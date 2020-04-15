@@ -3,16 +3,21 @@
 
 <head>
     <title>students api</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 </head>
 
 <body>
-    <div>
-        <button class="apireq">click me </button>
-    </div>
-    <div id="jsonresp" style="margin-top: 100px" class="tweet-data">
 
+
+    <div class="container">
+        <div class="row tweet-holder">
+
+        </div>
     </div>
+
+    <button id="test">Hello</button>
+
 
     <div>
         <h3>Want to Add a new tweet?</h3>
@@ -23,6 +28,11 @@
             <button type="submit" id="#click-tweet">Tweet</button>
         </form>
     </div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
     <script type="text/javascript">
         function getCookie(name) {
@@ -52,15 +62,29 @@
                 url: apiUrl,
                 dataType: "json",
                 success: function (data) {
+                    console.log(JSON.stringify(data));
                     $.each(data, function (index, value) {
-                        $('.tweet-data').append(`
-                            <p><label> Tweet :</label> <span id="tweet_title">${value.title}</span><br></p>
-                            <label> Added On :</label> <span id="last_name">${value.added}</span><br><br>
+                        let tweet = value.tweet;
+                        let time = value.added;
+                        let url = value.url;
+                        let id = value.id;
+                        $('.tweet-holder').append(`
+                        <div class="col-md-4 col-sm-6 p-2">
+                            <div class="card botder border-primary rounded-0" style="width: 18rem;">
+                                <div class="card-body">
+                                    <h5 class="card-title">${value.title}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">${value.added}</h6>
+                                    <button class="btn btn-sm btn-success" onclick="updateTweet();">Update Tweet</button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteTweet();" data-id='${id}'>{% csrf_token %}Delete Tweet</button>
+                                </div>
+                            </div>
+                        </div>
                         `);
                     });
                 },
             });
         }
+
 
         $(document).ready(function () {
             getData("http://localhost:8000/tweets/");
@@ -88,9 +112,17 @@
                         url: "http://localhost:8000/tweets/",
                         dataType: "json",
                         success: function (data) {
-                            $('.tweet-data').append(`
-                                <p><label> Tweet :</label> <span id="tweet_title">${data[0].title}</span><br></p>
-                                <label> Added On :</label> <span id="last_name">${data[0].added}</span><br><br>
+                            $('.tweet-holder').append(`
+                            <div class="col-md-4 col-sm-6 p-2">
+                                <div class="card botder border-primary rounded-0" style="width: 18rem;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${data[0].title}</h5>
+                                        <h6 class="card-subtitle mb-2 text-muted">${data[0].added}</h6>
+                                        <button class="btn btn-sm btn-success" onclick="updateTweet(${data[0].url});">Update Tweet</button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteTweet(${data[0].url});">{% csrf_token %}Delete Tweet</button>
+                                    </div>
+                                </div>
+                            </div>
                             `);
                         },
                     });
@@ -103,6 +135,33 @@
                 }
             });
         });
+
+        // For single tweets
+
+        let deleteTweet = () => {
+            let id = this.getAttribute('id');
+            console.log(id);
+            $.ajax({
+                url: tweetUrl,
+                type: 'DELETE',
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function (data) {
+                    getData("http://localhost:8000/tweets/");
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert("some error " + String(errorThrown) + String(textStatus) + String(
+                        XMLHttpRequest.responseText));
+                    console.log("some error " + String(errorThrown) + String(textStatus) + String(
+                        XMLHttpRequest.responseText));
+                }
+            });
+        }
+
+        $('button').click(function (e) {
+            console.log("Clicked");
+        })
     </script>
 </body>
 
