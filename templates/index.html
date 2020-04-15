@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>students api</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<body>
+    <div>
+        <button class="apireq">click me </button>
+    </div>
+    <div id="jsonresp" style="margin-top: 100px">
+        <p><label> Tweet :</label> <span id="first_name"></span></p>
+        <p><label> Added On :</label> <span id="last_name"></span></p>
+    </div>
+
+    <div>
+        <h3>Want to Add a new tweet?</h3>
+
+        <form id="submit-tweet" method="post">
+            {% csrf_token %}
+            <input type="text" name="tweet" id="tweet">
+            <button type="submit" id="#click-tweet">Tweet</button>
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        var csrftoken = getCookie('csrftoken');
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        $('.apireq').click(function () {
+            $.ajax({
+                url: "http://localhost:8000/tweets/",
+                dataType: "json",
+                success: function (data) {
+                    $('#first_name').text(data[0].title);
+                    $('#last_name').text(data[0].added);
+                }
+            });
+        });
+        console.log(csrftoken);
+
+        $("#submit-tweet").submit(function (e) {
+            e.preventDefault();
+            var apiUrl = "http://localhost:8000/tweets/";
+            var data = {
+                title: $('#tweet').val().trim(),
+            };
+
+            $.ajax({
+                url: apiUrl,
+                type: 'POST',
+                dataType: 'json',
+                contentType: "application/json; charset=utf-8",
+                crossDomain: false,
+                data: JSON.stringify(data),
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    alert('assigned');
+                },
+                success: function (data) {
+                    alert("Successs");
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert("some error " + String(errorThrown) + String(textStatus) + String(
+                        XMLHttpRequest.responseText));
+                        console.log("some error " + String(errorThrown) + String(textStatus) + String(
+                        XMLHttpRequest.responseText));
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
