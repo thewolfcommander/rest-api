@@ -10,9 +10,8 @@
     <div>
         <button class="apireq">click me </button>
     </div>
-    <div id="jsonresp" style="margin-top: 100px">
-        <p><label> Tweet :</label> <span id="first_name"></span></p>
-        <p><label> Added On :</label> <span id="last_name"></span></p>
+    <div id="jsonresp" style="margin-top: 100px" class="tweet-data">
+
     </div>
 
     <div>
@@ -48,17 +47,24 @@
             return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
         }
 
-        $('.apireq').click(function () {
+        let getData = (apiUrl) => {
             $.ajax({
-                url: "http://localhost:8000/tweets/",
+                url: apiUrl,
                 dataType: "json",
                 success: function (data) {
-                    $('#first_name').text(data[0].title);
-                    $('#last_name').text(data[0].added);
-                }
+                    $.each(data, function (index, value) {
+                        $('.tweet-data').append(`
+                            <p><label> Tweet :</label> <span id="tweet_title">${value.title}</span><br></p>
+                            <label> Added On :</label> <span id="last_name">${value.added}</span><br><br>
+                        `);
+                    });
+                },
             });
+        }
+
+        $(document).ready(function () {
+            getData("http://localhost:8000/tweets/");
         });
-        console.log(csrftoken);
 
         $("#submit-tweet").submit(function (e) {
             e.preventDefault();
@@ -76,15 +82,23 @@
                 data: JSON.stringify(data),
                 beforeSend: function (xhr, settings) {
                     xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                    alert('assigned');
                 },
                 success: function (data) {
-                    alert("Successs");
+                    $.ajax({
+                        url: "http://localhost:8000/tweets/",
+                        dataType: "json",
+                        success: function (data) {
+                            $('.tweet-data').append(`
+                                <p><label> Tweet :</label> <span id="tweet_title">${data[0].title}</span><br></p>
+                                <label> Added On :</label> <span id="last_name">${data[0].added}</span><br><br>
+                            `);
+                        },
+                    });
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     alert("some error " + String(errorThrown) + String(textStatus) + String(
                         XMLHttpRequest.responseText));
-                        console.log("some error " + String(errorThrown) + String(textStatus) + String(
+                    console.log("some error " + String(errorThrown) + String(textStatus) + String(
                         XMLHttpRequest.responseText));
                 }
             });
