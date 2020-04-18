@@ -40,7 +40,14 @@
         <form id="submit-tweet" method="post">
             {% csrf_token %}
             <input type="text" name="tweet" id="tweet">
-            <button type="submit" id="#click-tweet">Tweet</button>
+            <button type="submit" id="click-tweet">Tweet</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <form method="get">
+            <input type="text" name='search' id="tweet-search">
+            <button type="submit" id="search-tweet">Search</button>
         </form>
     </div>
 
@@ -73,8 +80,10 @@
         }
 
         let getData = (apiUrl) => {
+            console.log(apiUrl)
             $.ajax({
                 url: apiUrl,
+                type: 'GET',
                 dataType: "json",
                 success: function (data) {
                     // console.log(JSON.stringify(data));
@@ -89,8 +98,6 @@
                                 <div class="card-body">
                                     <h5 class="card-title">${value.title}</h5>
                                     <h6 class="card-subtitle mb-2 text-muted">${value.added}</h6>
-                                    <button class="btn btn-sm btn-success" onclick="" id="" type='button'>Update Tweet</button>
-                                    <button class="btn btn-sm btn-danger" onclick="" id="delete" type='button'>{% csrf_token %}Delete Tweet</button>
                                 </div>
                             </div>
                         </div>
@@ -101,9 +108,15 @@
         }
 
 
-        $(document).ready(function () {
-            getData("http://localhost:8000/tweets/");
-        });
+        // $(document).ready(function () {
+        //     getData("http://localhost:8000/tweets/");
+        // });
+
+        $('#search-tweet').click(function(e) {
+            e.preventDefault();
+            let val = $('#tweet-search').val();
+            getData(`http://localhost:8000/tweets?search=${val}`);
+        })
 
         $("#submit-tweet").submit(function (e) {
             e.preventDefault();
@@ -126,6 +139,7 @@
                     $.ajax({
                         url: "http://localhost:8000/tweets/",
                         dataType: "json",
+                        type: 'GET',
                         success: function (data) {
                             $('.tweet-holder').append(`
                             <div class="col-md-4 col-sm-6 p-2">
@@ -133,8 +147,6 @@
                                     <div class="card-body">
                                         <h5 class="card-title">${data[0].title}</h5>
                                         <h6 class="card-subtitle mb-2 text-muted">${data[0].added}</h6>
-                                        <button class="btn btn-sm btn-success" onclick="updateTweet(${data[0].url});">Update Tweet</button>
-                                        <button class="btn btn-sm btn-danger" onclick="deleteTweet(${data[0].url});">{% csrf_token %}Delete Tweet</button>
                                     </div>
                                 </div>
                             </div>
